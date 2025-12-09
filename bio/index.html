@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>korspotok</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.4;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Видео фон */
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        /* Затемнение фона */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: rgba(17, 17, 17, 0.85);
+            border-radius: 16px;
+            padding: 40px 30px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            animation: containerAppear 0.8s ease-out;
+        }
+
+        @keyframes containerAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: headerSlide 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes headerSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            border: 3px solid #8a2be2;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: avatarPulse 3s infinite alternate;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes avatarPulse {
+            0% {
+                box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+            }
+            100% {
+                box-shadow: 0 5px 25px rgba(138, 43, 226, 0.7);
+            }
+        }
+
+        .avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            border-color: #9a3bf2;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .tagline {
+            color: #8a2be2;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 8px 16px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .link-card {
+            background: linear-gradient(135deg, rgba(21, 21, 21, 0.9), rgba(26, 26, 26, 0.9));
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            animation: cardAppear 0.6s ease-out var(--delay) both;
+        }
+
+        @keyframes cardAppear {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.15), transparent);
+            transition: left 0.7s ease;
+            z-index: 1;
+        }
+
+        .link-card:hover::before {
+            left: 100%;
+        }
+
+        .link-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--hover-color);
+            box-shadow: 0 15px 30px var(--shadow-color);
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(34, 34, 34, 0.95));
+        }
+
+        .link-card.gift-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(138, 43, 226, 0.5);
+        }
+
+        .link-card:hover .link-icon {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 0 20px var(--shadow-color);
+        }
+
+        .link-card.gift-card:hover .link-icon {
+            transform: scale(1.2) rotate(15deg);
+            animation: giftPulse 0.8s infinite alternate;
+        }
+
+        @keyframes giftPulse {
+            0% {
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 30px rgba(138, 43, 226, 0.8);
+            }
+        }
+
+        .link-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.8), rgba(34, 34, 34, 0.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 22px;
+            color: var(--icon-color);
+            flex-shrink: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid #444;
+            position: relative;
+            z-index: 2;
+        }
+
+        .gift-card .link-icon {
+            background: linear-gradient(135deg, #222, #2a2a2a);
+            border-color: #8a2be2;
+        }
+
+        .link-content {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .link-content h3 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .gift-card .link-content h3 {
+            color: #8a2be2;
+        }
+
+        .link-content p {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .gift-card .link-content p {
+            color: #bbb;
+        }
+
+        .link-arrow {
+            color: #666;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+
+        .link-card:hover .link-arrow {
+            opacity: 1;
+            transform: translateX(0);
+            color: var(--icon-color);
+        }
+
+        /* Адаптив для телефонов */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                border-radius: 12px;
+                margin: 10px;
+            }
+
+            .links-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .avatar {
+                width: 100px;
+                height: 100px;
+            }
+
+            .tagline {
+                font-size: 1rem;
+                padding: 6px 12px;
+            }
+
+            .link-card {
+                padding: 18px;
+            }
+
+            .link-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+                margin-right: 15px;
+            }
+
+            .link-arrow {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 25px 15px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .avatar {
+                width: 90px;
+                height: 90px;
+            }
+
+            .tagline {
+                font-size: 0.9rem;
+            }
+
+            .link-card {
+                padding: 16px;
+            }
+
+            .link-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+                margin-right: 12px;
+            }
+
+            .link-content h3 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .link-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .link-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+
+        /* Анимации при скролле */
+        @media (prefers-reduced-motion: no-preference) {
+            .link-card {
+                animation-play-state: paused;
+            }
+
+            .link-card.in-view {
+                animation-play-state: running;
+            }
+        }
+
+        /* Стиль для видео не найдено */
+        .video-error {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
+            z-index: -2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Видео фон -->
+    <video id="bg-video" autoplay muted loop playsinline>
+        <source src="fon.mp4" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+    </video>
+    <div class="video-overlay"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="avatar">
+                <img src="ava.jpg" alt="Korspotok Avatar" onerror="this.onerror=null; this.src='https://via.placeholder.com/120/8a2be2/ffffff?text=K'">
+            </div>
+            <h1>korspotok</h1>
+            <div class="tagline">гарант 3$ 120+rews</div>
+        </div>
+
+        <div class="links-grid">
+            <a href="https://t.me/korspotok" target="_blank" class="link-card"
+               style="--delay: 0.2s; --hover-color: #8a2be2; --shadow-color: rgba(138, 43, 226, 0.2); --icon-color: #8a2be2;">
+                <div class="link-icon">
+                    <i class="fab fa-telegram"></i>
+                </div>
+                <div class="link-content">
+                    <h3>Личный Telegram</h3>
+                    <p>@korspotok</p>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <a href="https://t.me/fuckedyourface" target="_blank" class="link-card"
+               style="--delay: 0.3s; --hover-color: #0088cc; --shadow-color: rgba(0, 136, 204, 0.2); --icon-color: #0088cc;">
+                <div class="link-icon">
+                    <i class="fas fa-comment"></i>
+                </div>
+                <div class="link-content">
+                    <h3>Чатик</h3>
+                    <p>fuckedyourface</p>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <a href="https://t.me/+vmhGMLzObwAyY2Fi" target="_blank" class="link-card"
+               style="--delay: 0.4s; --hover-color: #4169e1; --shadow-color: rgba(65, 105, 225, 0.2); --icon-color: #4169e1;">
+                <div class="link-icon">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <div class="link-content">
+                    <h3>Основной канал</h3>
+                    <p>Подписаться</p>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <a href="https://t.me/repkaif" target="_blank" class="link-card"
+               style="--delay: 0.5s; --hover-color: #ffd700; --shadow-color: rgba(255, 215, 0, 0.2); --icon-color: #ffd700;">
+                <div class="link-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="link-content">
+                    <h3>Канал с отзывами</h3>
+                    <p>@repkaif</p>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <a href="https://tiktok.com/@korspotok_tg" target="_blank" class="link-card"
+               style="--delay: 0.6s; --hover-color: #ff0050; --shadow-color: rgba(255, 0, 80, 0.2); --icon-color: #ff0050;">
+                <div class="link-icon">
+                    <i class="fab fa-tiktok"></i>
+                </div>
+                <div class="link-content">
+                    <h3>TikTok</h3>
+                    <p>@korspotok_tg</p>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <a href="https://t.me/korspotok_gift" target="_blank" class="link-card gift-card"
+               style="--delay: 0.7s; --hover-color: #8a2be2; --shadow-color: rgba(138, 43, 226, 0.4); --icon-color: #8a2be2;">
+                <div class="link-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div class="link-content">
+                    <h3>Получить подарок</h3>
+                </div>
+                <div class="link-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Анимация появления элементов при скролле
+        document.addEventListener('DOMContentLoaded', function() {
+            // Управление видео фоном
+            const video = document.getElementById('bg-video');
+            const videoError = document.createElement('div');
+            videoError.className = 'video-error';
+
+            // Проверка наличия видео и обработка ошибок
+            video.addEventListener('error', function() {
+                console.log('Видео не загружено, используем градиентный фон');
+                document.body.appendChild(videoError);
+                video.style.display = 'none';
+            });
+
+            // Попытка воспроизвести видео
+            video.play().catch(function(error) {
+                console.log('Автовоспроизведение заблокировано:', error);
+                // Показываем видео, но не запускаем автоматически
+                video.controls = false;
+            });
+
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                    }
+                });
+            }, observerOptions);
+
+            // Наблюдаем за карточками
+            document.querySelectorAll('.link-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Эффект свечения при наведении
+            const cards = document.querySelectorAll('.link-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    const hoverColor = getComputedStyle(this).getPropertyValue('--hover-color');
+                    this.style.boxShadow = `0 0 25px ${hoverColor}40`;
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = '';
+                });
+            });
+
+            // Анимация иконок при клике
+            const icons = document.querySelectorAll('.link-icon i, .avatar img');
+            icons.forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    this.style.transform = 'scale(1.3) rotate(15deg)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 300);
+                });
+            });
+
+            // Плавное появление страницы
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.6s ease';
+
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+
+            // Адаптив для очень маленьких экранов
+            function checkScreenSize() {
+                if (window.innerWidth < 400) {
+                    document.querySelectorAll('.link-card').forEach(card => {
+                        if (!card.classList.contains('mobile-optimized')) {
+                            card.classList.add('mobile-optimized');
+                        }
+                    });
+                } else {
+                    document.querySelectorAll('.link-card').forEach(card => {
+                        card.classList.remove('mobile-optimized');
+                    });
+                }
+            }
+
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+
+            // Случайная анимация для карточки с подарком
+            const giftCard = document.querySelector('.gift-card');
+            if (giftCard) {
+                const giftIcon = giftCard.querySelector('.link-icon i');
+
+                setInterval(() => {
+                    if (!giftCard.matches(':hover')) {
+                        giftIcon.style.transform = `scale(${1 + Math.random() * 0.1}) rotate(${Math.random() * 10 - 5}deg)`;
+                        setTimeout(() => {
+                            if (!giftCard.matches(':hover')) {
+                                giftIcon.style.transform = '';
+                            }
+                        }, 500);
+                    }
+                }, 3000);
+            }
+
+            // Обработка ошибки загрузки аватарки
+            const avatarImg = document.querySelector('.avatar img');
+            if (avatarImg) {
+                avatarImg.onerror = function() {
+                    this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231a1a1a"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%238a2be2">K</text></svg>';
+                };
+            }
+        });
+    </script>
+</body>
+</html>
